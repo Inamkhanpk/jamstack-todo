@@ -7,13 +7,17 @@ const {
 } = require("@apollo/client");
 const { setContext } = require("apollo-link-context");
 const netlifyIdentity = require("netlify-identity-widget");
-
+const fetch = require("cross-fetch")
 const wrapRootElement = require("./wrap-root-element");
 
-const authLink = setContext((_, { headers }) => {
+const authLink = setContext((_, { headers,request, previousContext }) => {
+  
+  
+  netlifyIdentity.init({})
   const user = netlifyIdentity.currentUser();
+  
   const token = user.token.access_token;
-  // return the headers to the context so httpLink can read them
+  
   return {
     headers: {
       ...headers,
@@ -23,7 +27,8 @@ const authLink = setContext((_, { headers }) => {
 });
 
 const httpLink = new HttpLink({
-  uri: "https://todo-jamstack-serverless.netlify.app/.netlify/functions/graphql"
+  uri: "/.netlify/functions/todo",
+  fetch,
 });
 const client = new ApolloClient({
   cache: new InMemoryCache(),

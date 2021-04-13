@@ -40,29 +40,36 @@ const GET_TODOS = gql`
   }
 `;
 
-const todosReducer = (state, action) => {
-  switch (action.type) {
-    case "addTodo":
-      return [{ done: false, value: action.payload }, ...state];
-    case "toggleTodoDone":
-      const newState = [...state];
-      newState[action.payload] = {
-        done: !state[action.payload].done,
-        value: state[action.payload].value
-      };
-      return newState;
-  }
-};
+// const todosReducer = (state, action) => {
+//   switch (action.type) {
+//     case "addTodo":
+//       return [{ done: false, value: action.payload }, ...state];
+//     case "toggleTodoDone":
+//       const newState = [...state];
+//       newState[action.payload] = {
+//         done: !state[action.payload].done,
+//         value: state[action.payload].value
+//       };
+//       return newState;
+//   }
+// };
 
 export default () => {
   const { user, identity: netlifyIdentity } = useContext(IdentityContext);
-  const [todos, dispatch] = useReducer(todosReducer, []);
+  //const [todos, dispatch] = useReducer(todosReducer, []);
   const inputRef = useRef();
   const [addTodo] = useMutation(ADD_TODO);
   const [updateTodoDone] = useMutation(UPDATE_TODO_DONE);
   const { loading, error, data, refetch } = useQuery(GET_TODOS);
+
+  
+
   return (
+
     <Container>
+
+
+
       <Flex as="nav">
         <NavLink as={Link} to="/" p={2}>
           Home
@@ -82,10 +89,13 @@ export default () => {
           </NavLink>
         )}
       </Flex>
+
+
       <Flex
         as="form"
         onSubmit={async e => {
           e.preventDefault();
+          console.log(inputRef.current.value)
           await addTodo({ variables: { text: inputRef.current.value } });
           inputRef.current.value = "";
           await refetch();
@@ -93,12 +103,17 @@ export default () => {
       >
         <Label sx={{ display: "flex" }}>
           <span>Add&nbsp;Todo</span>
-          <Input ref={inputRef} sx={{ marginLeft: 1 }} />
+          <Input 
+          ref={inputRef} 
+          sx={{ marginLeft: 1 }} />
         </Label>
         <Button sx={{ marginLeft: 1 }}>Submit</Button>
       </Flex>
+
+
       <Flex sx={{ flexDirection: "column" }}>
         {loading ? <div>loading...</div> : null}
+        
         {error ? <div>{error.message}</div> : null}
         {!loading && !error && (
           <ul sx={{ listStyleType: "none" }}>
@@ -120,6 +135,7 @@ export default () => {
           </ul>
         )}
       </Flex>
+
     </Container>
   );
 };

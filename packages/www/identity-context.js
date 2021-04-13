@@ -10,6 +10,7 @@ const IdentityProvider = props => {
 
   React.useEffect(() => {
     netlifyIdentity.init({});
+    
   });
   netlifyIdentity.on("login", user => {
     netlifyIdentity.close();

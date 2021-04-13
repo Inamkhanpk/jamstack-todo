@@ -1,8 +1,8 @@
 const { ApolloServer, gql } = require("apollo-server-lambda");
 const faunadb = require("faunadb");
-const q = faunadb.query;
+ q = faunadb.query;
 
-var client = new faunadb.Client({ secret: process.env.FAUNADB_SECRET });
+var client = new faunadb.Client({ secret: 'fnAD-UD37LACAmFaVFEv8CCU29hzX57J4VDuWZ1-', });
 
 const typeDefs = gql`
   type Query {
@@ -26,8 +26,14 @@ const resolvers = {
         return [];
       } else {
         const results = await client.query(
-          q.Paginate(q.Match(q.Index("todos_by_user"), user))
-        );
+          // q.Map(
+          //   q.Paginate(q.Documents(q.Ref("todo"), user)),
+          //   q.Lambda((x) => q.Get(x))
+          // )
+           q.Paginate(q.Match(q.Index("todos_by_user"), user))
+             //q.Paginate(q.Documents(q.Collection("todos"))),
+        )
+        console.log(results)
         return results.data.map(([ref, text, done]) => ({
           id: ref.id,
           text,
@@ -38,13 +44,15 @@ const resolvers = {
   },
   Mutation: {
     addTodo: async (_, { text }, { user }) => {
+      console.log("============",user)
+      console.log("============",text)
       if (!user) {
         throw new Error("Login or Signup");
       }
       const results = await client.query(
-        q.Create(q.Collection("user-todos"), {
+        q.Create(q.Collection("todo"), {
           data: {
-            text,
+            text: text,
             done: false,
             owner: user
           }
@@ -60,7 +68,7 @@ const resolvers = {
         throw new Error("Login or Signup");
       }
       const results = await client.query(
-        q.Update(q.Ref(q.Collection("user-todos"), id), {
+        q.Update(q.Ref(q.Collection("todo"), id), {
           data: {
             done: true
           }
@@ -88,9 +96,11 @@ const server = new ApolloServer({
   introspection: true
 })
 
-exports.handler = server.createHandler({
-  cors: {
-    origin: "*",
-    credentials: true
-  }
-})
+exports.handler = server.createHandler(
+//   {
+//   cors: {
+//     origin: "*",
+//     credentials: true
+//   }
+// }
+)
